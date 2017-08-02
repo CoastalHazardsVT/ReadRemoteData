@@ -6,11 +6,11 @@ from matplotlib.pyplot import *
 import matplotlib.patches as patches
 import matplotlib.colors as colors
 from pylab import *
-from mpl_toolkits.basemap import Basemap, cm
+#from mpl_toolkits.basemap import Basemap, cm
 import string
 import warnings
 warnings.filterwarnings("ignore")
-import paramiko
+#import paramiko
 import string
 import webbrowser
 import os
