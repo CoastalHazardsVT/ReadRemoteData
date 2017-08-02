@@ -52,9 +52,9 @@ print shape(ar_45na)
 file_name_ts = 'year_2000.dat'
 ar_2000 = read_data(file_name_ts)
 
-file_name_ts = 'year_2050.dat'
+file_name_ts = 'year_2200.dat'
 ar_2050 = read_data(file_name_ts)
 print " 2000 \t 2050 \t Adjus \t % difference"
-#print ar_45na[5]
+print ar_45na[-1]
 for i in range(15):
-    print "{mean1:5.4f} \t {mean2:5.4f} \t {mean3:5.4f} \t {mean4:5.4f}".format(mean1=mean(ar_2000[i,:]),mean2=mean(ar_2050[i,:]), mean3=mean(ar_2050[i,:])-ar_45na[5],mean4=100*(1.0-((mean(ar_2050[i,:])-ar_45na[5])/mean(ar_2000[i,:]))))
+    print "{mean1:5.4f} \t {mean2:5.4f} \t {mean3:5.4f} \t {mean4:5.4f}".format(mean1=mean(ar_2000[i,:]),mean2=mean(ar_2050[i,:]), mean3=mean(ar_2050[i,:])-ar_45na[-1],mean4=100*(1.0-((mean(ar_2050[i,:])-ar_45na[-1])/mean(ar_2000[i,:]))))
