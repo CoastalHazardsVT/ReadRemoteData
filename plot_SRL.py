@@ -3,6 +3,7 @@ import os
 from numpy import *
 from random import randint
 from matplotlib.pyplot import *
+import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.colors as colors
 from pylab import *
@@ -15,12 +16,12 @@ import string
 import webbrowser
 import os
 from numpy import *
-matplotlib.rcParams['text.usetex'] = True
-matplotlib.rcParams['text.latex.unicode'] = True
-matplotlib.rcParams['axes.labelsize'] = 18
-matplotlib.rcParams['xtick.labelsize'] = 15
-matplotlib.rcParams['ytick.labelsize'] = 15
-matplotlib.rcParams['legend.fontsize'] = 15
+#matplotlib.rcParams['text.usetex'] = True
+#matplotlib.rcParams['text.latex.unicode'] = True
+#matplotlib.rcParams['axes.labelsize'] = 18
+#matplotlib.rcParams['xtick.labelsize'] = 15
+#matplotlib.rcParams['ytick.labelsize'] = 15
+#matplotlib.rcParams['legend.fontsize'] = 15
 
 def smooth(x,window_len=10,window='hanning'):
     """smooth the data using a window with requested size.
@@ -258,7 +259,7 @@ if s == 0:
     y2150_a_s = y2150_a
     y2200_a_s = y2200_a
 
-from scipy.interpolate import UnivariateSpline
+#from scipy.interpolate import UnivariateSpline
 n=len(y2100_s)
 xx=linspace(0.0,4,201)
 #xx=40
@@ -358,4 +359,4 @@ plot(x_2200,normalize(np_2200_a),'y:')
 ylim(0,.4)
 #plot(x_2000, p_2000, 'go')
 #plot(n_x, g2, 'g-', linewidth=6, alpha=.6)
-show()
+plt.show()
