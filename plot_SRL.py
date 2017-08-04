@@ -3,7 +3,7 @@ import os
 from numpy import *
 from random import randint
 from matplotlib.pyplot import *
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.colors as colors
 from pylab import *
@@ -92,8 +92,14 @@ def read_data_year(fname):
 
 def read_data(fname):
 #    print fname
-    array1 = loadtxt(fname)
-    return array1.T
+    array1 = loadtxt(fname,skiprows=1)
+    return array1
+
+
+#def read_data(fname):
+##    print fname
+#    array1 = loadtxt(fname)
+#    return array1.T
 
 def read_SLR(fname):
     array1 = loadtxt(fname)
@@ -133,9 +139,26 @@ nyear = len(year)
 neq = 15
 eqf = linspace(8.0,9.4,neq)
 
+filename2 = 'LA_slr_mc_subset_rcp45_k2014.txt.txt'
+slr_data2 = read_data(filename2)
+
+slr_data2 = slr_data2 * 1.0e-3
+
+print shape(slr_data2)
+#for i in range(100):
+#	plot(slr_data2[i,:])
 
 nreali = 24
 max_val = zeros([nyear,neq,nreali])
+xx=linspace(-1.0,4,21)
+slr_2100, slrx_2100 = histogram(slr_data2[:,9], bins=20,normed=True)
+
+#hist(slr_data2[:,9], 20, normed=1, facecolor='green', alpha=0.5)
+slrx_2100 = slrx_2100[:-1] + (slrx_2100[1] - slrx_2100[0])/2
+print shape(slr_2100), shape(slrx_2100)
+
+#plot(slrx_2100,slr_2100)
+print "done"
 
 for i in range(nyear):
     #for j in range(neq):
@@ -144,202 +167,225 @@ for i in range(nyear):
        # for k in range(nreali):
     local_f = 'year_{yeara}.dat'.format(yeara=int(year[i]))
     max_val[i,:,:] = read_data_year(local_f)
-
-
 print shape(max_val)
-file_name_slr = 'rcp45wa.txt'
-ar_45na = read_SLR(file_name_slr)
-print shape(ar_45na)
-
-t_type = 2
-x1=0
-x2=15
-if t_type == 1:
-    y2000 = []
-    y2050 = []
-    y2050_a = []
-    y2100 = []
-    y2100_a = []
-    y2150 = []
-    y2150_a = []
-    y2200 = []
-    y2200_a = []
-
-
-    xy2000 = []
-    xy2050 = []
-    xy2100 = []
-    xy2150 = []
-    xy2200 = []
-    for i in range(x1,x2):
-        #for j in range(nreali):
-        y2000.append(mean(max_val[0,i,:]))
-        xy2000.append(eqf[i])
-        y2050.append(mean(max_val[5,i,:]))
-        y2050_a.append(mean(max_val[0,i,:]+ar_45na[5]))
-        xy2050.append(eqf[i])
-        y2100.append(mean(max_val[10,i,:]))
-        y2100_a.append(mean(max_val[0,i,:]+ar_45na[10]))
-        xy2100.append(eqf[i])
-        y2150.append(mean(max_val[15,i,:]))
-        y2150_a.append(mean(max_val[0,i,:]+ar_45na[15]))
-        xy2150.append(eqf[i])
-        y2200.append(mean(max_val[-1,i,:]))
-        y2200_a.append(mean(max_val[0,i,:]+ar_45na[-1]))
-        xy2200.append(eqf[i])
-
-if t_type == 2:
-    y2000 = []
-    y2050 = []
-    y2050_a = []
-    y2100 = []
-    y2100_a = []
-    y2150 = []
-    y2150_a = []
-    y2200 = []
-    y2200_a = []
-
-
-    xy2000 = []
-    xy2050 = []
-    xy2100 = []
-    xy2150 = []
-    xy2200 = []
-    for i in range(x1,x2):
-        for j in range(nreali):
-            y2000.append(max_val[0,i,j])
-            xy2000.append(eqf[i])
-            y2050.append(max_val[5,i,j])
-            y2050_a.append(max_val[0,i,j]+ar_45na[5])
-            xy2050.append(eqf[i])
-            y2100.append(max_val[10,i,j])
-            y2100_a.append(max_val[0,i,j]+ar_45na[10])
-            xy2100.append(eqf[i])
-            y2150.append(max_val[15,i,j])
-            y2150_a.append(max_val[0,i,j]+ar_45na[15])
-            xy2150.append(eqf[i])
-            y2200.append(max_val[-1,i,j])
-            y2200_a.append(max_val[0,i,j]+ar_45na[-1])
-            xy2200.append(eqf[i])
-
-
-y2000 = array(y2000)
-y2050 = array(y2050)
-y2050_ = array(y2050_a)
-y2100 = array(y2100)
-y2100_a = array(y2100_a)
-y2150 = array(y2150)
-y2150_ = array(y2150_a)
-y2200 = array(y2200)
-y2200_a = array(y2200_a)
+comb_data = zeros([neq*nreali,100])
+m=-1
+comb_data1 = []
+for i in range(neq):
+	for j in range(nreali):
+		m=m+1
+		for k in range(100):
+			comb_data[m,k] = max_val[0,i,j]+slr_data2[k,9]
+			comb_data1.append(max_val[0,i,j]+slr_data2[k,9])
+		
+p_2100, x_2100 = histogram(comb_data1, bins=20,normed=True)
+x_2100 = x_2100[:-1] + (x_2100[1] - x_2100[0])/2
+comb_data1 = array(comb_data1)
+print shape(p_2100),shape(x_2100)
+matrix = slr_2100[:,None] * p_2100[:,None]
+#plot(x_2100,p_2100)
+print shape(comb_data),shape(comb_data1)
+pcolor(matrix)
+plt.show()
+#
 
 
 
-s = 1
+#
+#print shape(max_val)
+#file_name_slr = 'rcp45wa.txt'
+#ar_45na = read_SLR(file_name_slr)
+#print shape(ar_45na)
+#
+#t_type = 2
+#x1=0
+#x2=15
+#if t_type == 1:
+#    y2000 = []
+#    y2050 = []
+#    y2050_a = []
+#    y2100 = []
+#    y2100_a = []
+#    y2150 = []
+#    y2150_a = []
+#    y2200 = []
+#    y2200_a = []
+#
+#
+#    xy2000 = []
+#    xy2050 = []
+#    xy2100 = []
+#    xy2150 = []
+#    xy2200 = []
+#    for i in range(x1,x2):
+#        #for j in range(nreali):
+#        y2000.append(mean(max_val[0,i,:]))
+#        xy2000.append(eqf[i])
+#        y2050.append(mean(max_val[5,i,:]))
+#        y2050_a.append(mean(max_val[0,i,:]+ar_45na[5]))
+#        xy2050.append(eqf[i])
+#        y2100.append(mean(max_val[10,i,:]))
+#        y2100_a.append(mean(max_val[0,i,:]+ar_45na[10]))
+#        xy2100.append(eqf[i])
+#        y2150.append(mean(max_val[15,i,:]))
+#        y2150_a.append(mean(max_val[0,i,:]+ar_45na[15]))
+#        xy2150.append(eqf[i])
+#        y2200.append(mean(max_val[-1,i,:]))
+#        y2200_a.append(mean(max_val[0,i,:]+ar_45na[-1]))
+#        xy2200.append(eqf[i])
+#
+#if t_type == 2:
+#    y2000 = []
+#    y2050 = []
+#    y2050_a = []
+#    y2100 = []
+#    y2100_a = []
+#    y2150 = []
+#    y2150_a = []
+#    y2200 = []
+#    y2200_a = []
+#
+#
+#    xy2000 = []
+#    xy2050 = []
+#    xy2100 = []
+#    xy2150 = []
+#    xy2200 = []
+#    for i in range(x1,x2):
+#        for j in range(nreali):
+#            y2000.append(max_val[0,i,j])
+#            xy2000.append(eqf[i])
+#            y2050.append(max_val[5,i,j])
+#            y2050_a.append(max_val[0,i,j]+ar_45na[5])
+#            xy2050.append(eqf[i])
+#            y2100.append(max_val[10,i,j])
+#            y2100_a.append(max_val[0,i,j]+ar_45na[10])
+#            xy2100.append(eqf[i])
+#            y2150.append(max_val[15,i,j])
+#            y2150_a.append(max_val[0,i,j]+ar_45na[15])
+#            xy2150.append(eqf[i])
+#            y2200.append(max_val[-1,i,j])
+#            y2200_a.append(max_val[0,i,j]+ar_45na[-1])
+#            xy2200.append(eqf[i])
+#
+#
+#y2000 = array(y2000)
+#y2050 = array(y2050)
+#y2050_ = array(y2050_a)
+#y2100 = array(y2100)
+#y2100_a = array(y2100_a)
+#y2150 = array(y2150)
+#y2150_ = array(y2150_a)
+#y2200 = array(y2200)
+#y2200_a = array(y2200_a)
+#
+#
+#
+#s = 1
+##
+#
+#if s ==1:
+#    y2000_s = sort(y2000)
+#    y2050_s = sort(y2050)
+#    y2100_s = sort(y2100)
+#    y2050_a_s = sort(y2050_a)
+#    y2100_a_s = sort(y2100_a)
+#    y2150_s = sort(y2150)
+#    y2200_s = sort(y2200)
+#    y2150_a_s = sort(y2150_a)
+#    y2200_a_s = sort(y2200_a)
+#if s == 0:
+#    y2000_s = y2000
+#    y2050_s = y2050
+#    y2100_s = y2100
+#    y2050_a_s = y2050_a
+#    y2100_a_s = y2100_a
+#    y2150_s = y2150
+#    y2200_s = y2200
+#    y2150_a_s = y2150_a
+#    y2200_a_s = y2200_a
+#
+##from scipy.interpolate import UnivariateSpline
+#n=len(y2100_s)
+#xx=linspace(0.0,4,201)
+##xx=40
+#p_2000, x_2000 = histogram(y2000_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2000 = x_2000[:-1] + (x_2000[1] - x_2000[0])/2   # convert bin edges to centers
+#
+#p_2050, x_2050 = histogram(y2050_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2050 = x_2050[:-1] + (x_2050[1] - x_2050[0])/2
+#
+#p_2050_a, x_2050_a = histogram(y2050_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2050_a = x_2050_a[:-1] + (x_2050_a[1] - x_2050_a[0])/2
+#
+#p_2100, x_2100 = histogram(y2100_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2100 = x_2100[:-1] + (x_2100[1] - x_2100[0])/2   # convert bin edges to centers
+#
+#p_2100_a, x_2100_a = histogram(y2100_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2100_a = x_2100_a[:-1] + (x_2100_a[1] - x_2100_a[0])/2   # convert bin edges to centers
+#
+#p_2150, x_2150 = histogram(y2150_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2150 = x_2150[:-1] + (x_2150[1] - x_2150[0])/2
+#
+#p_2150_a, x_2150_a = histogram(y2150_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2150_a = x_2150_a[:-1] + (x_2150_a[1] - x_2150_a[0])/2
+#
+#p_2200, x_2200 = histogram(y2200_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2200 = x_2200[:-1] + (x_2200[1] - x_2200[0])/2   # convert bin edges to centers
+#
+#p_2200_a, x_2200_a = histogram(y2200_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
+#x_2200_a = x_2200_a[:-1] + (x_2200_a[1] - x_2200_a[0])/2   # convert bin edges to centers
+#
+#
+#
+#
+#
+#np_2000 = smooth(p_2000,10)
+#
+#np_2050 = smooth(p_2050,10)
+#np_2050[np_2050<0] =0
+#np_2050_a = smooth(p_2050_a,10)
+#np_2050_a[np_2050_a<0] =0
+#
+#
+#np_2100 = smooth(p_2100,10)
+#np_2100[np_2100<0] =0
+#np_2100_a = smooth(p_2100_a,10)
+#np_2100_a[np_2100_a<0] =0
+#
+#
+#
+#np_2150 = smooth(p_2150,10)
+#np_2150[np_2150<0] =0
+#np_2150_a = smooth(p_2150_a,10)
+#np_2150_a[np_2150_a<0] =0
+##
+#
+#
+#np_2200 = smooth(p_2200,10)
+#np_2200[np_2200<0] =0
+#np_2200_a = smooth(p_2200_a,10)
+#np_2200_a[np_2200_a<0] =0
+#
+#
+#plot(x_2000,normalize(np_2000),'k-')
 
 
-if s ==1:
-    y2000_s = sort(y2000)
-    y2050_s = sort(y2050)
-    y2100_s = sort(y2100)
-    y2050_a_s = sort(y2050_a)
-    y2100_a_s = sort(y2100_a)
-    y2150_s = sort(y2150)
-    y2200_s = sort(y2200)
-    y2150_a_s = sort(y2150_a)
-    y2200_a_s = sort(y2200_a)
-if s == 0:
-    y2000_s = y2000
-    y2050_s = y2050
-    y2100_s = y2100
-    y2050_a_s = y2050_a
-    y2100_a_s = y2100_a
-    y2150_s = y2150
-    y2200_s = y2200
-    y2150_a_s = y2150_a
-    y2200_a_s = y2200_a
-
-#from scipy.interpolate import UnivariateSpline
-n=len(y2100_s)
-xx=linspace(0.0,4,201)
-#xx=40
-p_2000, x_2000 = histogram(y2000_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2000 = x_2000[:-1] + (x_2000[1] - x_2000[0])/2   # convert bin edges to centers
-
-p_2050, x_2050 = histogram(y2050_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2050 = x_2050[:-1] + (x_2050[1] - x_2050[0])/2
-
-p_2050_a, x_2050_a = histogram(y2050_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2050_a = x_2050_a[:-1] + (x_2050_a[1] - x_2050_a[0])/2
-
-p_2100, x_2100 = histogram(y2100_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2100 = x_2100[:-1] + (x_2100[1] - x_2100[0])/2   # convert bin edges to centers
-
-p_2100_a, x_2100_a = histogram(y2100_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2100_a = x_2100_a[:-1] + (x_2100_a[1] - x_2100_a[0])/2   # convert bin edges to centers
-
-p_2150, x_2150 = histogram(y2150_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2150 = x_2150[:-1] + (x_2150[1] - x_2150[0])/2
-
-p_2150_a, x_2150_a = histogram(y2150_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2150_a = x_2150_a[:-1] + (x_2150_a[1] - x_2150_a[0])/2
-
-p_2200, x_2200 = histogram(y2200_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2200 = x_2200[:-1] + (x_2200[1] - x_2200[0])/2   # convert bin edges to centers
-
-p_2200_a, x_2200_a = histogram(y2200_a_s, bins=xx,normed=True) # bin it into n = N/10 bins
-x_2200_a = x_2200_a[:-1] + (x_2200_a[1] - x_2200_a[0])/2   # convert bin edges to centers
 
 
+#plot(x_2050,normalize(np_2050),'b-')
+#plot(x_2050,normalize(np_2050_a),'b:')
+#
+#plot(x_2100,normalize(np_2100),'r-')
+#plot(x_2100,normalize(np_2100_a),'r:')
 
 
-
-np_2000 = smooth(p_2000,10)
-
-np_2050 = smooth(p_2050,10)
-np_2050[np_2050<0] =0
-np_2050_a = smooth(p_2050_a,10)
-np_2050_a[np_2050_a<0] =0
+#plot(x_2150,normalize(np_2150),'g-')
+#plot(x_2150,normalize(np_2150_a),'g:')
 
 
-np_2100 = smooth(p_2100,10)
-np_2100[np_2100<0] =0
-np_2100_a = smooth(p_2100_a,10)
-np_2100_a[np_2100_a<0] =0
-
-
-
-np_2150 = smooth(p_2150,10)
-np_2150[np_2150<0] =0
-np_2150_a = smooth(p_2150_a,10)
-np_2150_a[np_2150_a<0] =0
-
-
-
-np_2200 = smooth(p_2200,10)
-np_2200[np_2200<0] =0
-np_2200_a = smooth(p_2200_a,10)
-np_2200_a[np_2200_a<0] =0
-
-
-plot(x_2000,normalize(np_2000),'k-')
-
-
-
-
-plot(x_2050,normalize(np_2050),'b-')
-plot(x_2050,normalize(np_2050_a),'b:')
-
-plot(x_2100,normalize(np_2100),'r-')
-plot(x_2100,normalize(np_2100_a),'r:')
-
-
-plot(x_2150,normalize(np_2150),'g-')
-plot(x_2150,normalize(np_2150_a),'g:')
-
-
-plot(x_2200,normalize(np_2200),'y-')
-plot(x_2200,normalize(np_2200_a),'y:')
+#plot(x_2200,normalize(np_2200),'y-')
+#plot(x_2200,normalize(np_2200_a),'y:')
 
 
 
@@ -356,7 +402,7 @@ plot(x_2200,normalize(np_2200_a),'y:')
 # plot(x_2200, smooth(normalize(p_2200_a)), 'y:')
 
 #xlim(0,10)
-ylim(0,.4)
+#ylim(0,.4)
 #plot(x_2000, p_2000, 'go')
 #plot(n_x, g2, 'g-', linewidth=6, alpha=.6)
-plt.show()
+#plt.show()

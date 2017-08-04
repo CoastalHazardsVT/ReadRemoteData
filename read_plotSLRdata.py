@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 from matplotlib import gridspec
 import matplotlib.colors as colors
 from pylab import *
-from mpl_toolkits.basemap import Basemap, cm
+#from mpl_toolkits.basemap import Basemap, cm
 import string
 import warnings
 warnings.filterwarnings("ignore")
@@ -16,7 +16,7 @@ import string
 import webbrowser
 import os
 from numpy import *
-from scipy.optimize import curve_fit
+#from scipy.optimize import curve_fit
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.unicode'] = True
