@@ -150,8 +150,8 @@ print shape(slr_data2)
 
 nreali = 24
 max_val = zeros([nyear,neq,nreali])
-xx=linspace(-1.0,4,21)
-slr_2100, slrx_2100 = histogram(slr_data2[:,9], bins=20,normed=True)
+xx=linspace(-0.0,2,31)
+slr_2100, slrx_2100 = histogram(slr_data2[:,9], bins=xx,normed=True)
 
 #hist(slr_data2[:,9], 20, normed=1, facecolor='green', alpha=0.5)
 slrx_2100 = slrx_2100[:-1] + (slrx_2100[1] - slrx_2100[0])/2
@@ -171,21 +171,42 @@ print shape(max_val)
 comb_data = zeros([neq*nreali,100])
 m=-1
 comb_data1 = []
+comb_data2 = []
+
 for i in range(neq):
-	for j in range(nreali):
-		m=m+1
-		for k in range(100):
-			comb_data[m,k] = max_val[0,i,j]+slr_data2[k,9]
-			comb_data1.append(max_val[0,i,j]+slr_data2[k,9])
-		
-p_2100, x_2100 = histogram(comb_data1, bins=20,normed=True)
+    for j in range(nreali):
+        m=m+1
+        for k in range(100):
+            comb_data[m,k] = max_val[0,i,j]+slr_data2[k,9]
+            comb_data1.append(max_val[0,i,j]+slr_data2[k,9])
+xx1=linspace(-0,2,31)
+p_2100, x_2100 = histogram(comb_data1, bins=xx1,normed=True)
 x_2100 = x_2100[:-1] + (x_2100[1] - x_2100[0])/2
 comb_data1 = array(comb_data1)
 print shape(p_2100),shape(x_2100)
-matrix = slr_2100[:,None] * p_2100[:,None]
+nslr_2100 = normalize(slr_2100)
+np_2100 = normalize(p_2100)
+matrix = nslr_2100[:,None] * np_2100[None,:]
 #plot(x_2100,p_2100)
-print shape(comb_data),shape(comb_data1)
-pcolor(matrix)
+print shape(comb_data),shape(comb_data1), shape(matrix)
+figure(1)
+#imshow(matrix)
+
+cb=pcolor(xx1,xx,matrix,cmap='Blues')
+cb1=colorbar(cb)
+cb1.set_label('Probability')#, rotation=270)
+
+autoscale(False)
+xlabel("Flood level")
+ylabel("Sea level")
+# figure(2)
+# pcolor(max_val[0,:,:])
+#
+# figure(3)
+# #for i in range(100):
+# hist(slr_data2[:,9],bins=20)
+# figure(4)
+# plot(x_2100,p_2100)
 plt.show()
 #
 
