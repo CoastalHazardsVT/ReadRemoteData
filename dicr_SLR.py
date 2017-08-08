@@ -126,6 +126,41 @@ def find_index_SLR(arr, value):
             print index_val
             break
     return int(index_val)
+
+import functools
+
+def quantiles(arr_x, arr_y,pp):
+    xvals = linspace(0.0, 1.0,1001)
+    yinterp = interp(xvals, arr_y,arr_x)
+    for i in range(1001):
+        if pp <= xvals[i]:
+            index_pp = i
+            break
+    return yinterp[index_pp]
+
+def prep_PDF(slr_in):
+    xx=linspace(-1.0,16,21)
+    slr_2100, slrx_2100 = histogram(slr_in, bins=xx,normed=True)
+    slrx_2100 = slrx_2100[:-1] + (slrx_2100[1] - slrx_2100[0])/2
+    nslr_2100 = normalize(slr_2100)
+    nslr_2100 = smooth(nslr_2100)
+    nslr_2100[nslr_2100 < 0.0] = 0.0
+#    print trapz(nslr_2100)
+    nslr_2100 = normalize(nslr_2100)
+#    print trapz(nslr_2100)
+    nslr_2100[nslr_2100 < nslr_2100.max()*0.05] = 0.0
+#    print trapz(nslr_2100)
+    nslr_2100 = normalize(nslr_2100)
+    #plot(slrx_2100, nslr_2100)
+#    print trapz(nslr_2100)
+    return slrx_2100, nslr_2100
+
+def write_median(mode1,np05,np25,np50,np75,np95,fname1):
+    ar3=column_stack((mode1,np05,np25,np50,np75,np95))
+    outfile=open(fname1,'w')
+    savetxt(outfile, ar3,fmt='%6.3f')
+    outfile.close()
+
 # main code
 # file_name_slr = 'rcp45na.txt'
 # ar_45na = read_SLR(file_name_slr)
@@ -147,98 +182,170 @@ nyear = len(year)
 neq = 15
 eqf = linspace(8.0,9.4,neq)
 
-filename2 = 'LA_slr_mc_subset_rcp45_k2014.txt.txt'
+
+#filename2 = 'LA_slr_mc_subset_rcp45_dpais.txt'
+#outfile = 'rcp45_dist_wa.txt'
+#filename2 = 'LA_slr_mc_subset_rcp45_k2014.txt.txt'
+#outfile = 'rcp45_dist_na.txt'
+filename2 = 'LA_slr_mc_subset_rcp85_dpais.txt'
+outfile = 'rcp85_dist_wa.txt'
+
 slr_data2 = read_data(filename2)
 
 slr_data2 = slr_data2 * 1.0e-3
 
-print shape(slr_data2)
+print shape(slr_data2), average(slr_data2[:,-1])
 #for i in range(100):
 #	plot(slr_data2[i,:])
 
-nreali = 24
-max_val = zeros([nyear,neq,nreali])
-xx=linspace(-0.0,2,101)
-slr_2100, slrx_2100 = histogram(slr_data2[:,9], bins=100,normed=True)
-slrx_2100 = slrx_2100[:-1] + (slrx_2100[1] - slrx_2100[0])/2
-
-slr_2200, slrx_2200 = histogram(slr_data2[:,19], bins=100,normed=True)
-slrx_2200 = slrx_2200[:-1] + (slrx_2200[1] - slrx_2200[0])/2
-
-print shape(slr_2100), shape(slrx_2100)
-
-#plot(slrx_2100,slr_2100)
-print "done"
-
-for i in range(nyear):
-    #for j in range(neq):
-       # dummy = '{test:3.2f}'.format(test=eqf[j])
-       # mag_name = dummy.replace('.', '')
-       # for k in range(nreali):
-    local_f = 'year_{yeara}.dat'.format(yeara=int(year[i]))
-    max_val[i,:,:] = read_data_year(local_f)
-print shape(max_val)
-comb_data = zeros([neq*nreali,100])
-m=-1
-comb_data1 = []
-comb_data2 = []
-
-for i in range(neq):
-    for j in range(nreali):
-        m=m+1
-        for k in range(100):
-            comb_data[m,k] = max_val[0,i,j]+slr_data2[k,9]
-            comb_data1.append(max_val[0,i,j]+slr_data2[k,9])
-            comb_data2.append(max_val[0,i,j]+slr_data2[k,19])
-comb_data1 = array(comb_data1)
-comb_data2 = array(comb_data2)
-xx1=linspace(-0,2,101)
-p_2100, x_2100 = histogram(comb_data1, bins=xx1,normed=True)
-x_2100 = x_2100[:-1] + (x_2100[1] - x_2100[0])/2
-
-p_2200, x_2200 = histogram(comb_data2, bins=xx1,normed=True)
-x_2200 = x_2200[:-1] + (x_2200[1] - x_2200[0])/2
-
-
-eta = p_2100# + p_2200
-slr = slr_2100# + slr_2200
-
-print shape(eta)
-n_slr  =normalize(slr)
-n_eta = normalize(eta)
-print shape(p_2100),shape(x_2100)
-nslr_2100 = normalize(slr_2100)
-np_2100 = normalize(p_2100)
-matrix = n_slr[:,None] * n_eta[None,:]
-#plot(x_2100,p_2100)
-matrix = normalize(matrix)
-print shape(comb_data),shape(comb_data1), shape(matrix)
-figure(1)
-#imshow(matrix)
-
-cb=pcolor(x_2100,slrx_2100,matrix,cmap='Blues')
-cb1=colorbar(cb)
-cb1.set_label('Probability')#, rotation=270)
-
-#autoscale(False)
-xlabel("Flood level")
-ylabel("Sea level")
-# figure(2)
-# pcolor(max_val[0,:,:])
+# nreali = 24
+# max_val = zeros([nyear,neq,nreali])
+# xx=linspace(-1.0,12,131)
+# slr_2100, slrx_2100 = histogram(slr_data2[:,9], bins=xx,normed=True)
+# slrx_2100 = slrx_2100[:-1] + (slrx_2100[1] - slrx_2100[0])/2
 #
-# figure(3)
-# #for i in range(100):
-# hist(slr_data2[:,9],bins=20)
-# figure(4)
-# plot(x_2100,p_2100)
-figure(2)
-print len(xx1),len(slrx_2100)
-plot(x_2100,matrix[find_index_SLR(slrx_2100, 0.5),:])
-plot(x_2100,matrix[find_index_SLR(slrx_2100, 1.5),:])
+# slr_2200, slrx_2200 = histogram(slr_data2[:,19], bins=xx,normed=True)
+# slrx_2200 = slrx_2200[:-1] + (slrx_2200[1] - slrx_2200[0])/2
+#
+#
+# #slr_2100 = smooth(slr_2100)
+# print shape(slr_2100), shape(slrx_2100)
+#
+# #plot(slrx_2100,slr_2100)
+# print "done"
+#
+# for i in range(nyear):
+#     #for j in range(neq):
+#        # dummy = '{test:3.2f}'.format(test=eqf[j])
+#        # mag_name = dummy.replace('.', '')
+#        # for k in range(nreali):
+#     local_f = 'year_{yeara}.dat'.format(yeara=int(year[i]))
+#     max_val[i,:,:] = read_data_year(local_f)
+# print shape(max_val)
+# comb_data = zeros([neq*nreali,100])
+# m=-1
+# comb_data1 = []
+# comb_data2 = []
+#
+# for i in range(neq):
+#     for j in range(nreali):
+#         m=m+1
+#         for k in range(100):
+#             comb_data[m,k] = max_val[0,i,j]+slr_data2[k,9]
+#             comb_data1.append(max_val[0,i,j]+slr_data2[k,9])
+#             comb_data2.append(max_val[0,i,j]+slr_data2[k,19])
+# comb_data1 = array(comb_data1)
+# comb_data2 = array(comb_data2)
+# xx1=linspace(-0,2,101)
+# p_2100, x_2100 = histogram(comb_data1, bins=xx1,normed=True)
+# x_2100 = x_2100[:-1] + (x_2100[1] - x_2100[0])/2
+#
+# p_2200, x_2200 = histogram(comb_data2, bins=xx1,normed=True)
+# x_2200 = x_2200[:-1] + (x_2200[1] - x_2200[0])/2
+#
+#
+# eta = p_2100# + p_2200
+# slr = slr_2100# + slr_2200
+# #
+# # print shape(eta)
+# n_slr  =normalize(slr)
+# # n_eta = normalize(eta)
+# # print shape(p_2100),shape(x_2100)
+# nslr_2100 = normalize(slr_2100)
+# nslr_2200 = normalize(slr_2200)
+# # np_2100 = normalize(p_2100)
+# # matrix = n_slr[:,None] * n_eta[None,:]
+# # #plot(x_2100,p_2100)
+# # matrix = normalize(matrix)
+# # print shape(comb_data),shape(comb_data1), shape(matrix)
+# # figure(1)
+# # #imshow(matrix)
+# #
+# # cb=pcolor(x_2100,slrx_2100,matrix,cmap='Blues')
+# # cb1=colorbar(cb)
+# # cb1.set_label('Probability')#, rotation=270)
+# #
+# # #autoscale(False)
+# # xlabel("Flood level")
+# # ylabel("Sea level")
+# # # figure(2)
+# # # pcolor(max_val[0,:,:])
+# # #
+# # # figure(3)
+# # # #for i in range(100):
+# # # hist(slr_data2[:,9],bins=20)
+# # # figure(4)
+# # # plot(x_2100,p_2100)
+# # figure(2)
+# # print len(xx1),len(slrx_2100)
+# # plot(x_2100,matrix[find_index_SLR(slrx_2100, 0.5),:])
+# # plot(x_2100,matrix[find_index_SLR(slrx_2100, 1.5),:])
+# #
+# # figure(3)
+# nslr_2100 = smooth(nslr_2100)
+# nslr_2100[nslr_2100 < 0.0] = 0.0
+# print trapz(nslr_2100)
+# nslr_2100 = normalize(nslr_2100)
+# print trapz(nslr_2100)
+# nslr_2100[nslr_2100 < nslr_2100.max()*0.05] = 0.0
+# print trapz(nslr_2100)
+# nslr_2100 = normalize(nslr_2100)
+# print trapz(nslr_2100)
+#
+# nslr_2200 = smooth(nslr_2200)
+# nslr_2200[nslr_2200 < 0.0] = 0.0
+# print trapz(nslr_2100)
+# nslr_2200 = normalize(nslr_2200)
+# print trapz(nslr_2200)
+# nslr_2200[nslr_2200 < nslr_2200.max()*0.05] = 0.0
+# print trapz(nslr_2200)
+# nslr_2200 = normalize(nslr_2200)
+# print trapz(nslr_2200)
+# figure(1)
+# plot(slrx_2100,nslr_2100)
+# plot(slrx_2200,nslr_2200)
+#
+# figure(2)
+# plot(slrx_2100, cumsum(nslr_2100))
+# plot(slrx_2200, cumsum(nslr_2200))
+# #plot(x_2100,np_2100)
+# print quantiles(slrx_2100, cumsum(nslr_2100),0.5)
+#print "Mode \t D05 \t D25 \t D50 \t D75 \t D95"
+p05 = []
+p25 = []
+p50 = []
+p75 = []
+p95 = []
+mode = []
+mode.append(0.0)
+p05.append(0.0)
+p25.append(0.0)
+p50.append(0.0)
+p75.append(0.0)
+p95.append(0.0)
+for i in range(20):
+    dummy1, dummy2 = prep_PDF(slr_data2[:,i])
+    #plot(dummy1,cumsum(dummy2))
+    p05.append(quantiles(dummy1, cumsum(dummy2),0.05))
+    p25.append(quantiles(dummy1, cumsum(dummy2),0.25))
+    p50.append(quantiles(dummy1, cumsum(dummy2),0.5))
+    p75.append(quantiles(dummy1, cumsum(dummy2),0.75))
+    p95.append(quantiles(dummy1, cumsum(dummy2),0.95))
+    mode.append(dummy1[argmax(dummy2)])
+    #print mode, p05,p25,p50,p75,p95
+#    print "{mxxx:5.2f} \t {p1xxx:5.2f} \t {p2xxx:5.2f} \t {p3xxx:5.2f} \t {p4xxx:5.2f} \t {p5xxx:5.2f}".format(mxxx=mode, p1xxx=p05, p2xxx=p25, p3xxx=p50, p4xxx=p75, p5xxx=p95)
 
-figure(3)
-plot(slrx_2100,nslr_2100)
-plot(x_2100,np_2100)
+# axvline(mode, color='r', linestyle=':')
+# axvline(p50, color='k', linestyle=':')
+# axvline(p05, color='k', linestyle=':')
+# axvline(p75, color='k', linestyle=':')
+# axvline(p25, color='k', linestyle=':')
+# axvline(p95, color='k', linestyle=':')
+# xlim(0,2)
+write_median(mode,p05,p25,p50,p75,p95,outfile)
+plot(dummy1,dummy2)
+# plot(quantiles(slrx_2100, cumsum(nslr_2100),0.5),0.5,'ko')
+# plot(quantiles(slrx_2200, cumsum(nslr_2200),0.5),0.5,'ko')
 
 #print trapz(matrix[find_index_SLR(slrx_2100, 0.5),:])
 #print trapz(matrix[find_index_SLR(slrx_2100, 0.21),:])
